@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+APP="upssched-cmd"
+
+case $1 in
+    notify_onbatt)
+        logger -t $APP "UPS is running on battery"
+        {{ gotify_script_path }} "{{ gotify_creds_path }}" 1 $APP "UPS is running on battery"
+        ;;
+    notify_online)
+        logger -t $APP "UPS back online"
+        {{ gotify_script_path }} "{{ gotify_creds_path }}" 1 $APP "UPS is back online"
+        ;;
+    notify_lowbatt)
+        logger -t $APP "UPS on battery is low"
+        {{ gotify_script_path }} "{{ gotify_creds_path }}" 1 $APP "UPS on battery is low"
+        ;;
+    onbatt)
+        logger -t $APP "UPS has been running on battery for {{ upssched_onbattery_timer }} seconds"
+        {{ gotify_script_path }} "{{ gotify_creds_path }}" 1 $APP "UPS has been running on battery for {{ upssched_onbattery_timer }} seconds"
+        ;;
+    lowbatt)
+        logger -t $APP "UPS has been on low battery for {{ upssched_lowbattery_timer }} seconds"
+        {{ gotify_script_path }} "{{ gotify_creds_path }}" 1 $APP "UPS has been on low battery for {{ upssched_lowbattery_timer }} seconds"
+        /usr/sbin/upsmon -c fsd
+        ;;
+    *)
+        logger -t $APP "Unrecognized command: $1"
+        ;;
+esac

@@ -1,0 +1,10 @@
+CMDSCRIPT {{ upssched_script_path }}
+PIPEFN /run/nut/upssched.pipe
+LOCKFN /run/nut/upssched.lock
+AT ONBATT * START-TIMER onbatt {{ upssched_onbattery_timer }}
+AT ONLINE * CANCEL-TIMER onbatt
+AT ONBATT * EXECUTE notify_onbatt
+AT ONLINE * EXECUTE notify_online
+AT LOWBATT * EXECUTE notify_lowbatt
+AT ONBATT * START-TIMER lowbatt {{ upssched_lowbattery_timer }}
+AT ONLINE * CANCEL-TIMER lowbatt

@@ -1,0 +1,12 @@
+[{{ upsd_admin_username }}]
+    password = {{ upsd_admin_password }}
+    actions = SET
+    instcmds = ALL
+
+[{{ upsd_upsmon_username }}]
+    password = {{ upsd_upsmon_password }}
+    upsmon {{ monitor_type }}
+
+[{{ upsd_remote_username }}]
+    password = {{ upsd_remote_password }}
+    upsmon slave

@@ -1,0 +1,104 @@
+---
+- name: Install NUT Server and Client
+  apt:
+    state: present
+    update_cache: yes
+    name: "{{ item }}"
+  loop: "{{ nut_packages }}"
+
+- name: Check for nut-scanner
+  shell: "which nut-scanner"
+  become: no
+  register: nut_scanner
+  changed_when: false
+  failed_when: nut_scanner.rc != 0
+
+- name: Copy over ups.conf
+  template:
+    src: "../templates/ups.conf.j2"
+    dest: "/etc/nut/ups.conf"
+    owner: "{{ nut_user }}"
+    group: "{{ nut_group }}"
+    mode: '0640'
+
+- name: Add UPS configuration to {{ ups_conf_tmp_path }}
+  shell: |
+    {{ nut_scanner.stdout }} -U | tail -n +2 > {{ ups_conf_tmp_path }}
+    sed -i s/nutdev[0-9]/{{ ups_device_name }}/ {{ ups_conf_tmp_path }}
+    echo "" >> /etc/nut/ups.conf
+    cat {{ ups_conf_tmp_path }} >> /etc/nut/ups.conf
+  become: yes
+  register: ups_conf_add
+  
+- name: Copy over nut.conf
+  template:
+    src: "../templates/nut.conf.j2"
+    dest: "/etc/nut/nut.conf"
+    owner: "{{ nut_user }}"
+    group: "{{ nut_group }}"
+    mode: '0640'
+
+- name: Copy over upsd.users
+  template:
+    src: "../templates/upsd.users.j2"
+    dest: "/etc/nut/upsd.users"
+    owner: "{{ nut_user }}"
+    group: "{{ nut_group }}"
+    mode: '0640'
+
+- name: Copy over upsd.conf
+  template:
+    src: "../templates/upsd.conf.j2"
+    dest: "/etc/nut/upsd.conf"
+    owner: "{{ nut_user }}"
+    group: "{{ nut_group }}"
+    mode: '0640'
+
+- name: Copy over upsmon.conf
+  template:
+    src: "../templates/upsmon.conf.j2"
+    dest: "/etc/nut/upsmon.conf"
+    owner: "{{ nut_user }}"
+    group: "{{ nut_group }}"
+    mode: '0640'
+
+- name: Copy over upssched.conf
+  template:
+    src: "../templates/upssched.conf.j2"
+    dest: "/etc/nut/upssched.conf"
+    owner: "{{ nut_user }}"
+    group: "{{ nut_group }}"
+    mode: '0640'
+
+- name: Copy over upssched-cmd
+  template:
+    src: "../templates/upssched-cmd.sh.j2"
+    dest: "{{ upssched_script_path }}"
+    owner: "root"
+    group: "root"
+    mode: '0755'
+
+- name: Restarting nut driver
+  shell: |
+    /usr/sbin/upsdrvctl stop
+    /usr/sbin/upsdrvctl start
+  become: yes
+  register: upsdrvctl_restart
+
+- name: Enable and start nut-server
+  systemd:
+    state: restarted
+    name: nut-server
+    enabled: true
+
+- name: Enable and start nut-client
+  systemd:
+    state: restarted
+    name: nut-client
+    enabled: true
+
+- name: Enable and start nut-monitor
+  systemd:
+    state: restarted
+    name: nut-monitor
+    enabled: true

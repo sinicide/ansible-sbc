@@ -1,0 +1,69 @@
+nut_enabled: "{{ nut.enabled | default(false) }}"
+nut_user: "root"
+nut_group: "nut"
+
+nut_packages:
+  - nut
+  - nut-server
+  - nut-client
+
+# nut.conf
+nut_mode: "{{ nut.mode | default(netserver) }}"
+
+# ups.conf
+ups_conf_tmp_path: "/tmp/ups_config.txt"
+ups_device_name: "ups-device"
+ups_conf_maxretry: "3"
+ups_conf_pollinterval: "1"
+
+# upsmon.conf
+upsmon_runasuser: "{{ nut_upsmon_runasuser | default('nut') }}"
+upsmon_minsupplies: "{{ nut_upsmon_minsupplies | default(1) }}"
+upsmon_shutdowncmd: "{{ nut_upsmon_shutdowncmd | default('/sbin/shutdown -h +0') }}"
+upsmon_notifycmd: "{{ nut_upsmon_notifycmd | default() }}"
+upsmon_pollfreq: "{{ nut_upsmon_pollfreq | default(5) }}"
+upsmon_pollfreqalert: "{{ nut_upsmon_pollfreqalert | default(5) }}"
+upsmon_hostsync: "{{ nut_upsmon_hostsync | default(15) }}"
+upsmon_deadtime: "{{ nut_upsmon_deadtime | default(15) }}"
+upsmon_powerdownflag: "{{ nut_upsmon_powerdownflag | default('/etc/killpower') }}"
+upsmon_rbwarntime: "{{ nut_upsmon_rbwarntime | default(43200) }}"
+upsmon_nocommwarntime: "{{ nut_upsmon_nocommwarntime | default(300) }}"
+upsmon_finaldelay: "{{ nut_upsmon_finaldelay | default(5) }}"
+
+# notify flag
+upsmon_notifyflag_default: "SYSLOG+EXEC"
+upsmon_notifyflag_online: "{{ nut_upsmon_notifyflag_online | default(upsmon_notifyflag_default) }}"
+upsmon_notifyflag_onbatt: "{{ nut_upsmon_notifyflag_onbatt | default(upsmon_notifyflag_default) }}"
+upsmon_notifyflag_lowbatt: "{{ nut_upsmon_notifyflag_lowbatt | default(upsmon_notifyflag_default) }}"
+upsmon_notifyflag_fsd: "{{ nut_upsmon_notifyflag_fsd | default('SYSLOG') }}"
+upsmon_notifyflag_commok: "{{ nut_upsmon_notifyflag_commok | default('SYSLOG') }}"
+upsmon_notifyflag_commbad: "{{ nut_upsmon_notifyflag_commbad | default('SYSLOG') }}"
+upsmon_notifyflag_shutdown: "{{ nut_upsmon_notifyflag_shutdown | default('SYSLOG') }}"
+upsmon_notifyflag_replbatt: "{{ nut_upsmon_notifyflag_replbatt | default('SYSLOG') }}"
+upsmon_notifyflag_nocomm: "{{ nut_upsmon_notifyflag_nocomm | default('SYSLOG') }}"
+upsmon_notifyflag_noparent: "{{ nut_upsmon_notifyflag_noparent | default('SYSLOG') }}"
+
+# upsd.users
+upsd_admin_username: "{{ nut.users.admin_username | default('admin') }}"
+upsd_admin_password: "{{ nut.users.admin_password | default('topsecret') }}"
+upsd_upsmon_username: "{{ nut.users.upsmon_username | default('upsmon') }}"
+upsd_upsmon_password: "{{ nut.users.upsmon_password | default('topsecret') }}"
+upsd_remote_username: "{{ nut.users.remote_username | default('remote') }}"
+upsd_remote_password: "{{ nut.users.remote_password | default('topsecret') }}"
+
+# upsd.conf
+upsd_conf_listen_address: "0.0.0.0"
+upsd_conf_listen_port: "{{ nut_upsd_conf_listen_port | default(3493) }}"
+upsd_conf_maxage: "30"
+ups_system: "{{ ups_device_name }}@localhost:{{ upsd_conf_listen_port }}"
+monitor_power_value: "1"
+monitor_type: "master"
+
+# upssched.conf
+upssched_script_path: "/usr/bin/upssched-cmd.sh"
+upssched_onbattery_timer: "300"
+upssched_lowbattery_timer: "180"
+
+# gotify variables
+gotify_creds_path: "/home/{{ ansible_user }}/.gotify_creds"
+gotify_script_path: "/usr/bin/sendMsg.sh"

@@ -1,0 +1,24 @@
+{% if upsmon_runasuser is defined and upsmon_runasuser != "nut" %}
+RUN_AS_USER {{ upsmon_runasuser }}
+{% endif %}
+MINSUPPLIES {{ upsmon_minsupplies }}
+SHUTDOWNCMD "{{ upsmon_shutdowncmd }}"
+POLLFREQ {{ upsmon_pollfreq }}
+POLLFREQALERT {{ upsmon_pollfreqalert }}
+HOSTSYNC {{ upsmon_hostsync }}
+DEADTIME {{ upsmon_deadtime }}
+RBWARNTIME {{ upsmon_rbwarntime }}
+NOCOMMWARNTIME {{ upsmon_nocommwarntime }}
+FINALDELAY {{ upsmon_finaldelay }}
+MONITOR {{ ups_system }} {{ monitor_power_value }} {{ upsd_upsmon_username }} {{ upsd_upsmon_password }} {{ monitor_type }}
+NOTIFYCMD /usr/sbin/upssched
+NOTIFYFLAG ONLINE {{ upsmon_notifyflag_online }}
+NOTIFYFLAG ONBATT {{ upsmon_notifyflag_onbatt }}
+NOTIFYFLAG LOWBATT {{ upsmon_notifyflag_lowbatt }}
+NOTIFYFLAG FSD {{ upsmon_notifyflag_fsd }}
+NOTIFYFLAG COMMOK {{ upsmon_notifyflag_commok }}
+NOTIFYFLAG COMMBAD {{ upsmon_notifyflag_commbad }}
+NOTIFYFLAG SHUTDOWN {{ upsmon_notifyflag_shutdown }}
+NOTIFYFLAG REPLBATT {{ upsmon_notifyflag_replbatt }}
+NOTIFYFLAG NOCOMM {{ upsmon_notifyflag_nocomm }}
+NOTIFYFLAG NOPARENT {{ upsmon_notifyflag_noparent }}
