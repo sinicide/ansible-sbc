@@ -1,0 +1,2 @@
+gotify_creds_path: "/home/{{ ansible_user }}/.gotify_creds"
+gotify_script_path: "/usr/bin/sendMsg.sh"

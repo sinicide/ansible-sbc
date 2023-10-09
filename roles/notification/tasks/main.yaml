@@ -1,0 +1,21 @@
+---
+- name: Copying gotify Credentials to host
+  template:
+    src: "../templates/gotify_creds.j2"
+    dest: "{{ gotify_creds_path }}"
+    mode: '0644'
+
+- name: Copying gotify sendMsg script to host
+  copy:
+    src: "../files/sendMsg.sh"
+    dest: "{{ gotify_script_path }}"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: Sending a test message
+  shell: "{{ gotify_script_path }} {{ gotify_creds_path }} 1 ansible-test 'This is a test from ansible deployment for {{ ansible_host }}'"
+  become: no
+  register: gotify_test_msg
+  failed_when: "gotify_test_msg == 2"
+  changed_when: false
