@@ -1,0 +1,22 @@
+common_packages:
+  - ca-certificates
+  - gnupg
+  - vim
+  - git
+  - curl
+  - netcat
+  - dnsutils
+  - stow
+  - tree
+  - htop
+  - jq
+  - scp
+  - rsync
+
+debian_packages:
+  - lsb-release
+  - nfs-common
+
+os_timezone: "America/Chicago"
+
+ssl_directory: "/etc/ssl"
