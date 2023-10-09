@@ -1,0 +1,9 @@
+# from Techno Tim's guide https://technotim.live/posts/NUT-server-guide/
+# if not usb, do nothing
+SUBSYSTEM!="usb", GOTO="nut-usbups_rules_end"
+
+# ensure you're matching idProduct == productId and idVendor == vendorId of the usb device
+ACTION=="add|change",SUBSYSTEM=="usb|usb_device",SUBSYSTEMS=="usb|usb_device",MODE="664",GROUP="nut",ATTR{idVendor}=="{{ ups_device_vendorid }}",ATTR{idProduct}=="{{ ups_device_productid }}",RUN+="/sbin/upsdrvctl stop; /sbin/upsdrvctl start"
+
+# exit without doing anything
+LABEL="nut-usbups_rules_end"

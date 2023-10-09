@@ -29,7 +29,37 @@
     cat {{ ups_conf_tmp_path }} >> /etc/nut/ups.conf
   become: yes
   register: ups_conf_add
-  
+
+- name: Get ups vendorId
+  shell: cat {{ ups_conf_tmp_path }} | grep -m 1 vendorid | awk '{print $3}' | sed s/\"//g
+  become: no
+  register: ups_vendorid
+  changed_when: false
+  failed_when: ups_vendorid == 2
+
+- name: Get ups productId
+  shell: cat {{ ups_conf_tmp_path }} | grep -m 1 productid | awk '{print $3}' | sed s/\"//g
+  become: no
+  register: ups_productid
+  changed_when: false
+  failed_when: ups_productid == 2
+
+- debug:
+    msg:
+      - "ups vendor id = {{ ups_vendorid.stdout }}"
+      - "ups product id = {{ ups_productid.stdout }}"
+
+- name: Copy over udev-rule
+  template:
+    src: "../templates/99-nut-ups.rules.j2"
+    dest: "/etc/udev/rules.d/99-nut-ups.rules"
+    owner: "root"
+    group: "root"
+    mode: '0644'
+  vars:
+    ups_device_vendorid: "{{ ups_vendorid.stdout }}"
+    ups_device_productid: "{{ ups_productid.stdout }}"
+
 - name: Copy over nut.conf
   template:
     src: "../templates/nut.conf.j2"
