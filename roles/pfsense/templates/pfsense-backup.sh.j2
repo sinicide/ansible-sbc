@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+# usage: PFSENSE_USERNAME=backupUser SERVER=pfsense.fqdn.com BACKUP_USERNAME=backupUser BACKUP_SERVER=truenas.fqdn.com BACKUP_SERVER_PATH=/mnt/pool/backup pfsense-backup.sh
+
+APP="pfsense-backup"
+PFSENSE_CONFIG_FILE={{ pfsense_config_path }}
+BACKUP_DIRECTORY="/tmp"
+CURRENT_TIME=$(date +"%Y-%m-%d-%H%M%S")
+BACKUP_CONFIG_NAME="pfsense-config-$CURRENT_TIME.xml"
+BACKUP_CONFIG_PATH="/tmp"
+PING_ATTEMPT=0
+FAILED_COUNT=3
+
+# verify that we can reach pfsense
+while true; do
+
+	/usr/bin/ping -c 1 $SERVER > /dev/null 2>&1
+	if [ $? -eq 0 ]; then
+		logger -t $APP "$SERVER is accessible"
+		break
+	else
+		logger -t $APP "Failed to ping $SERVER"
+		sleep 5
+		PING_ATTEMPT+=1
+		if [ "$PING_ATTEMPT" -ge "$FAILED_COUNT" ]; then
+			logger -t $APP "Failed to ping $SERVER, exiting..."
+			{{ gotify_script_path }} "{{ gotify_creds_path }}" 1 $APP "Failed to ping $SERVER"
+			exit 1
+		fi
+	fi
+done
+
+# pull config.xml
+/usr/bin/scp $PFSENSE_USERNAME@$SERVER:$PFSENSE_CONFIG_FILE $BACKUP_CONFIG_PATH/$BACKUP_CONFIG_NAME
+
+if [ -f "$BACKUP_CONFIG_PATH/$BACKUP_CONFIG_NAME" ]; then
+	# compress the .xml
+	# delete .xml file
+	tar -czf $BACKUP_CONFIG_PATH/$BACKUP_CONFIG_NAME.tar.gz $BACKUP_CONFIG_PATH/$BACKUP_CONFIG_NAME
+	if [ -f "$BACKUP_CONFIG_PATH/$BACKUP_CONFIG_NAME.tar.gz" ]; then
+		logger -t $APP "Compressed $BACKUP_CONFIG_PATH/$BACKUP_CONFIG_NAME.tar.gz"
+		rm -f $BACKUP_CONFIG_PATH/$BACKUP_CONFIG_NAME
+	else
+		logger -t $APP "Could not compress $BACKUP_CONFIG_PATH/$BACKUP_CONFIG_NAME, file might be missing"
+		exit 1
+	fi
+else
+	logger -t $APP "Cannot locate $BACKUP_CONFIG_PATH, exiting!"
+	exit 1
+fi
+
+# rsync to backup server
+/usr/bin/rsync -av -e ssh $BACKUP_CONFIG_PATH/$BACKUP_CONFIG_NAME.tar.gz $BACKUP_USERNAME@$BACKUP_SERVER:$BACKUP_SERVER_PATH
+
+if [ $? != 0 ]; then
+	logger -t $APP "There was an issue with rsync command"
+	exit 1
+else
+	logger -t $APP "Rsync completed, removing temp backup file"
+	rm -f $BACKUP_CONFIG_PATH/$BACKUP_CONFIG_NAME.tar.gz
+fi

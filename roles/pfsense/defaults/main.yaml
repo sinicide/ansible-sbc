@@ -1,0 +1,11 @@
+pfsense_script_path: "/usr/bin/pfsense-backup.sh"
+pfsense_config_path: "/cf/conf/config.xml"
+
+gotify_creds_path: "/home/{{ ansible_user }}/.gotify_creds"
+gotify_script_path: "/usr/bin/sendMsg.sh"
+
+pfsense_remote_username: "{{ pfsense.remote.username | default('undefined') }}"
+pfsense_remote_server: "{{ pfsense.remote.server | default('undefined') }}"
+backup_remote_username: "{{ pfsense.backup.username | default('undefined') }}"
+backup_remote_server: "{{ pfsense.backup.server | default('undefined') }}"
+backup_remote_path: "{{ pfsense.backup.path | default('undefined') }}"

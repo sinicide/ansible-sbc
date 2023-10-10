@@ -1,0 +1,22 @@
+---
+- name: Copy over pfsense-backup.sh
+  template:
+    src: "../templates/pfsense-backup.sh.j2"
+    dest: "{{ pfsense_script_path }}"
+    owner: "root"
+    group: "root"
+    mode: '0750'
+
+- name: Configure crontab for pfsense-backup.sh
+  cron:
+    name: "pfSense backup"
+    month: "*"
+    weekday: "*"
+    day: "*"
+    hour: "1"
+    minute: "0"
+    user: "root"
+    job: "PFSENSE_USERNAME={{ pfsense_remote_username }} SERVER={{ pfsense_remote_server }} BACKUP_USERNAME={{ backup_remote_username }} BACKUP_SERVER={{ backup_remote_server }} BACKUP_SERVER_PATH={{ backup_remote_path }} {{ pfsense_script_path }}"
+
+- debug:
+    msg: "Please remember to perform initial ssh to both pfsense and backup servers and ensure passwordless login"
