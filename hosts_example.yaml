@@ -1,0 +1,43 @@
+---
+all:
+  vars:
+    ansible_connection: ssh
+    ansible_user: pi
+    ansible_become: true
+
+    # self-signed certs
+    custom_ssl_ca: ~/full-ca-chain.crt
+    custom_ssl_cert: ~/wildcard-cert.crt
+    custom_ssl_key: ~/wildcard-cert.key
+    custom_ssl_fullchain_cert: ~/fullchain-cert.crt
+
+    # NUT configuration
+    nut:
+      enabled: true
+      mode: "netserver"
+      # users:
+      #   admin_username: "admin"
+      #   admin_password: "topsecret"
+      #   upsmon_username: "upsmon"
+      #   upsmon_password: "topsecret"
+      #   remote_username: "remote"
+      #   remote_password: "topsecret"
+
+    # Gotify config
+    gotify_server: ""
+    gotify_token: ""
+
+    # pfsense backup
+    pfsense:
+      enabled: true
+      remote:
+        username: "backupUser"
+        server: "pfsense.local"
+      backup:
+        username: "backupUser"
+        server: "truneas.local"
+        path: "/mnt/pool/backup/"
+
+sbc:
+  hosts:
+    raspberrypi.local:
