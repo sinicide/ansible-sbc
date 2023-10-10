@@ -1,0 +1,49 @@
+---
+- name: Create node_exporter group
+  group:
+    name: "{{ node_exporter_group }}"
+    system: "true"
+
+- name: Create node_exporter user
+  user:
+    name: "{{ node_exporter_user }}"
+    create_home: false
+    group: "{{ node_exporter_group }}"
+    system: "true"
+
+- name: Download and Extract archive
+  unarchive:
+    src: "{{ exporter_download_url }}"
+    dest: "/tmp/"
+    remote_src: yes
+
+- name: Move node_exporter into {{ node_exporter_bin_path }}
+  copy:
+    src: "{{ tmp_package_path }}/node_exporter"
+    dest: "{{ node_exporter_bin_path }}/node_exporter"
+    owner: "{{ node_exporter_user }}"
+    group: "{{ node_exporter_group }}"
+    mode: "0755"
+    remote_src: "true"
+
+- name: Create node_exporter directory
+  file:
+    path: "{{ node_exporter_path }}"
+    state: "directory"
+    owner: "{{ node_exporter_user }}"
+    group: "{{ node_exporter_group }}"
+
+- name: Copy over systemd unit file
+  template:
+    src: "../templates/node_exporter.service.j2"
+    dest: "/etc/systemd/system/node_exporter.service"
+    owner: "root"
+    group: "root"
+    mode: '0644'
+
+- name: Enable and Start Node Exporter Service
+  systemd:
+    state: restarted
+    name: node_exporter.service
+    daemon_reload: true
+    enabled: true

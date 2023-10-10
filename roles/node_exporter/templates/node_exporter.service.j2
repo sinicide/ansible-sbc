@@ -1,0 +1,11 @@
+[Unit]
+Description=Node Exporter
+
+[Service]
+User={{ node_exporter_user }}
+ExecStart={{ node_exporter_bin_path }}/node_exporter --collector.textfile.directory {{ node_exporter_path }}/textfile_collector
+Restart=on-failure
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target
