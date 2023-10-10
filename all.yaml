@@ -1,0 +1,40 @@
+---
+# Install OS common packages and configuration
+- name: Prequisites
+  tags: common,packages
+  hosts: sbc
+  tasks:
+    - import_role:
+        name: common
+  
+# Install Notification Script
+- name: Installing Notification scripts
+  tags: notification
+  hosts: sbc
+  tasks:
+    - import_role:
+        name: notification
+
+# Install NUT
+- name: Installing NUT
+  tags: nut
+  hosts: sbc
+  tasks:
+    - import_role:
+        name: nut
+
+# Install pfsense script
+- name: Installing pfsense backup
+  tags: pfsense
+  hosts: sbc
+  tasks:
+    - import_role:
+        name: pfsense
+
+# Install node exporter
+- name: Installing Node Exporter
+  tags: node_exporter
+  hosts: sbc
+  tasks:
+    - import_role:
+        name: node_exporter
