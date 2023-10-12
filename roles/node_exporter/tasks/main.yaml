@@ -28,7 +28,7 @@
 
 - name: Create node_exporter directory
   file:
-    path: "{{ node_exporter_path }}"
+    path: "{{ node_exporter_path }}/textfile_collector"
     state: "directory"
     owner: "{{ node_exporter_user }}"
     group: "{{ node_exporter_group }}"
