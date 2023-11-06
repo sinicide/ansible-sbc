@@ -4,13 +4,12 @@ common_packages:
   - vim
   - git
   - curl
-  - netcat
+  - netcat-openbsd
   - dnsutils
   - stow
   - tree
   - htop
   - jq
-  - scp
   - rsync
 
 debian_packages:
