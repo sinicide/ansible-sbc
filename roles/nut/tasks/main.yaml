@@ -26,6 +26,7 @@
     {{ nut_scanner.stdout }} -U | tail -n +2 > {{ ups_conf_tmp_path }}
     sed -i s/nutdev[0-9]/{{ ups_device_name }}/ {{ ups_conf_tmp_path }}
     echo "" >> /etc/nut/ups.conf
+    echo "[{{ ups_device_name }}]" >> /etc/nut/ups.conf
     cat {{ ups_conf_tmp_path }} >> /etc/nut/ups.conf
   become: yes
   register: ups_conf_add
@@ -114,6 +115,7 @@
     /usr/sbin/upsdrvctl start
   become: yes
   register: upsdrvctl_restart
+  failed_when: upsdrvctl_restart == 2
 
 - name: Enable and start nut-server
   systemd:
