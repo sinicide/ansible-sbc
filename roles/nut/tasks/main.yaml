@@ -8,10 +8,20 @@
 
 - name: Check for nut-scanner
   shell: "which nut-scanner"
-  become: no
+  become: false
   register: nut_scanner
   changed_when: false
   failed_when: nut_scanner.rc != 0
+
+- name: Checking for Connected UPS devices
+  shell: "{{ nut_scanner.stdout }} -U -q | grep -c 'nutdev'"
+  become: true
+  register: ups_device_count
+  changed_when: false
+  failed_when: ups_device_count == 2
+
+- debug:
+    msg: "Found {{ ups_device_count.stdout }} UPS Devices"
 
 - name: Copy over ups.conf
   template:
@@ -19,36 +29,28 @@
     dest: "/etc/nut/ups.conf"
     owner: "{{ nut_user }}"
     group: "{{ nut_group }}"
-    mode: '0640'
+    mode: "0640"
 
 - name: Add UPS configuration to {{ ups_conf_tmp_path }}
   shell: |
-    {{ nut_scanner.stdout }} -U | tail -n +2 > {{ ups_conf_tmp_path }}
-    sed -i s/nutdev[0-9]/{{ ups_device_name }}/ {{ ups_conf_tmp_path }}
+    {{ nut_scanner.stdout }} -U -q > {{ ups_conf_tmp_path }}
+    sed -i -E "s/nutdev([0-9])/{{ ups_device_name_prefix }}-\1/g" {{ ups_conf_tmp_path }}
     echo "" >> /etc/nut/ups.conf
-    echo "[{{ ups_device_name }}]" >> /etc/nut/ups.conf
     cat {{ ups_conf_tmp_path }} >> /etc/nut/ups.conf
-  become: yes
+  become: true
   register: ups_conf_add
 
-- name: Get ups vendorId
-  shell: cat {{ ups_conf_tmp_path }} | grep -m 1 vendorid | awk '{print $3}' | sed s/\"//g
-  become: no
-  register: ups_vendorid
+- name: Get Parsable UPS Output
+  shell: |
+    {{ nut_scanner.stdout }} -U -q -P | awk -F ',' '{ print "{\"" $3 ",\"" $4 "}" }' | sed 's/=/": /g'
+  become: true
+  register: ups_device_parsable
   changed_when: false
-  failed_when: ups_vendorid == 2
+  failed_when: ups_device_parsable == 2
 
-- name: Get ups productId
-  shell: cat {{ ups_conf_tmp_path }} | grep -m 1 productid | awk '{print $3}' | sed s/\"//g
-  become: no
-  register: ups_productid
-  changed_when: false
-  failed_when: ups_productid == 2
-
-- debug:
-    msg:
-      - "ups vendor id = {{ ups_vendorid.stdout }}"
-      - "ups product id = {{ ups_productid.stdout }}"
+# Uncomment for debugging
+#- debug:
+#    msg: "{{ ups_device_parsable.stdout_lines }}"
 
 - name: Copy over udev-rule
   template:
@@ -56,10 +58,9 @@
     dest: "/etc/udev/rules.d/99-nut-ups.rules"
     owner: "root"
     group: "root"
-    mode: '0644'
+    mode: "0644"
   vars:
-    ups_device_vendorid: "{{ ups_vendorid.stdout }}"
-    ups_device_productid: "{{ ups_productid.stdout }}"
+    ups_devices: "{{ ups_device_parsable.stdout_lines|list }}"
 
 - name: Copy over nut.conf
   template:
@@ -67,7 +68,7 @@
     dest: "/etc/nut/nut.conf"
     owner: "{{ nut_user }}"
     group: "{{ nut_group }}"
-    mode: '0640'
+    mode: "0640"
 
 - name: Copy over upsd.users
   template:
@@ -75,7 +76,7 @@
     dest: "/etc/nut/upsd.users"
     owner: "{{ nut_user }}"
     group: "{{ nut_group }}"
-    mode: '0640'
+    mode: "0640"
 
 - name: Copy over upsd.conf
   template:
@@ -83,7 +84,7 @@
     dest: "/etc/nut/upsd.conf"
     owner: "{{ nut_user }}"
     group: "{{ nut_group }}"
-    mode: '0640'
+    mode: "0640"
 
 - name: Copy over upsmon.conf
   template:
@@ -91,7 +92,9 @@
     dest: "/etc/nut/upsmon.conf"
     owner: "{{ nut_user }}"
     group: "{{ nut_group }}"
-    mode: '0640'
+    mode: "0640"
+  vars:
+    device_count: "{{ ups_device_count.stdout }}"
 
 - name: Copy over upssched.conf
   template:
@@ -99,7 +102,7 @@
     dest: "/etc/nut/upssched.conf"
     owner: "{{ nut_user }}"
     group: "{{ nut_group }}"
-    mode: '0640'
+    mode: "0640"
 
 - name: Copy over upssched-cmd
   template:
@@ -107,13 +110,13 @@
     dest: "{{ upssched_script_path }}"
     owner: "root"
     group: "root"
-    mode: '0755'
+    mode: "0755"
 
 - name: Restarting nut driver
   shell: |
     /usr/sbin/upsdrvctl stop
     /usr/sbin/upsdrvctl start
-  become: yes
+  become: true
   register: upsdrvctl_restart
   failed_when: upsdrvctl_restart == 2
 

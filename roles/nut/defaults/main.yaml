@@ -12,7 +12,7 @@ nut_mode: "{{ nut.mode | default(netserver) }}"
 
 # ups.conf
 ups_conf_tmp_path: "/tmp/ups_config.txt"
-ups_device_name: "ups-device"
+ups_device_name_prefix: "ups-device"
 ups_conf_maxretry: "3"
 ups_conf_pollinterval: "1"
 
@@ -67,3 +67,4 @@ upssched_lowbattery_timer: "180"
 # gotify variables
 gotify_creds_path: "/home/{{ ansible_user }}/.gotify_creds"
 gotify_script_path: "/usr/bin/sendMsg.sh"
+

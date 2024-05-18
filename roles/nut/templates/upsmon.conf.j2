@@ -10,7 +10,9 @@ DEADTIME {{ upsmon_deadtime }}
 RBWARNTIME {{ upsmon_rbwarntime }}
 NOCOMMWARNTIME {{ upsmon_nocommwarntime }}
 FINALDELAY {{ upsmon_finaldelay }}
-MONITOR {{ ups_system }} {{ monitor_power_value }} {{ upsd_upsmon_username }} {{ upsd_upsmon_password }} {{ monitor_type }}
+{% for device in range(1, device_count|int+1) %}
+MONITOR {{ ups_device_name_prefix }}-{{ device }}@localhost:{{ upsd_conf_listen_port }} {{ monitor_power_value }} {{ upsd_upsmon_username }} {{ upsd_upsmon_password }} {{ monitor_type }}
+{% endfor %}
 NOTIFYCMD /usr/sbin/upssched
 NOTIFYFLAG ONLINE {{ upsmon_notifyflag_online }}
 NOTIFYFLAG ONBATT {{ upsmon_notifyflag_onbatt }}

@@ -3,7 +3,10 @@
 SUBSYSTEM!="usb", GOTO="nut-usbups_rules_end"
 
 # ensure you're matching idProduct == productId and idVendor == vendorId of the usb device
-ACTION=="add|change",SUBSYSTEM=="usb|usb_device",SUBSYSTEMS=="usb|usb_device",MODE="664",GROUP="nut",ATTR{idVendor}=="{{ ups_device_vendorid }}",ATTR{idProduct}=="{{ ups_device_productid }}",RUN+="/sbin/upsdrvctl stop; /sbin/upsdrvctl start"
+{% for item in ups_devices %}
+{% set device = item|from_json %}
+ACTION=="add|change",SUBSYSTEM=="usb|usb_device",SUBSYSTEMS=="usb|usb_device",MODE="664",GROUP="nut",ATTR{idVendor}=="{{ device.vendorid }}",ATTR{idProduct}=="{{ device.productid }}",RUN+="/sbin/upsdrvctl stop; /sbin/upsdrvctl start"
+{% endfor %}
 
 # exit without doing anything
 LABEL="nut-usbups_rules_end"
