@@ -1,0 +1,45 @@
+global
+        maxconn 4096
+        user {{ haproxy_user }}
+        group {{ haproxy_group }}
+        daemon
+        log 127.0.0.1 local0 debug
+{% if octoprint_ssl_enabled == true %}
+        ssl-default-bind-options ssl-min-ver TLSv1.2
+        ssl-default-bind-ciphers {{ haproxy_ssl_ciphers }}
+        ssl-server-verify none
+{% endif %}
+
+defaults
+        log     global
+        mode    http
+        option  httplog
+        option  dontlognull
+        retries 3
+        option redispatch
+        option http-server-close
+        option forwardfor
+        maxconn 2000
+        timeout connect 5s
+        timeout client  15m
+        timeout server  15m
+
+frontend public
+        bind :::80 v4v6
+{% if octoprint_ssl_enabled == true %}
+        bind :443 ssl crt {{ haproxy_ssl_dir }}/octoprint.pem
+        http-request redirect scheme https unless { ssl_fc }
+{% endif %}
+        use_backend webcam if { path_beg /webcam/ }
+        default_backend octoprint
+
+backend octoprint
+        option forwardfor
+{% if octoprint_ssl_enabled == true %}
+        http-request set-header X-Forwarded-Proto https if { ssl_fc }
+{% endif %}
+        server octoprint1 127.0.0.1:{{ octoprint_web_port }}
+
+backend webcam
+        http-request replace-path /webcam/(.*)   /\1
+        server webcam1  127.0.0.1:{{ octoprint_webcam_port }}

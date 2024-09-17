@@ -24,6 +24,8 @@ all:
       #   remote_password: "topsecret"
 
     # Gotify config
+    notification:
+      enabled: false
     gotify_server: ""
     gotify_token: ""
 
@@ -37,6 +39,11 @@ all:
         username: "backupUser"
         server: "truneas.local"
         path: "/mnt/pool/backup/"
+
+    # Octoprint
+    octoprint:
+      install: false
+      ssl_enabled: false
 
 sbc:
   hosts:
