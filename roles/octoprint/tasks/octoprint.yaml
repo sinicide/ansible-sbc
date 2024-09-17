@@ -1,0 +1,70 @@
+---
+- name: Install Python {{ python_version }} Packages
+  apt:
+    state: present
+    update_cache: yes
+    name: "{{ item }}"
+  loop: "{{ python_packages }}"
+
+- name: Install additional packages
+  apt:
+    state: present
+    name: "{{ item }}"
+  loop: "{{ packages }}"
+
+- name: Create OctoPrint Group
+  group:
+    name: "{{ octoprint_group }}"
+    state: present
+
+- name: Create OctoPrint User and Group
+  user:
+    name: "{{ octoprint_user }}"
+    groups:
+      - "{{ octoprint_group }}"
+      - "tty"
+      - "dialout"
+      - "video"
+    create_home: true
+    home: "{{ octoprint_base_dir }}"
+    shell: "/sbin/nologin"
+    state: present
+    append: true
+
+- name: does octoprint exist
+  debug:
+    msg: "{{ octoprint_venv_check.stat.exists }}"
+
+- name: Install OctoPrint Python Module
+  pip:
+    name:
+      - pip
+      - wheel
+      - octoprint=={{ octoprint_version }}
+    virtualenv: "{{ octoprint_base_dir }}"
+    virtualenv_command: "python3 -m venv"
+    extra_args: "--upgrade"
+
+- name: Ensure {{ octoprint_user }} owns {{ octoprint_base_dir }}
+  shell:
+    cmd: "chown -R {{ octoprint_user}}:{{ octoprint_group }} {{ octoprint_base_dir }}"
+  become: yes
+
+- name: Create octoprint service
+  template:
+    src: "../templates/octoprint.service.j2"
+    dest: "/etc/systemd/system/octoprint.service"
+
+- name: Enable octoprint service
+  systemd:
+    name: octoprint
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: Ensure octoprint user can execute sudo actions
+  community.general.sudoers:
+    name: octoprint-actions
+    state: present
+    user: "{{ octoprint_user }}"
+    commands: "{{ octoprint_sudoer_actions }}"

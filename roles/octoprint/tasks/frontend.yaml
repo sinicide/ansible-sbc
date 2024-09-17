@@ -1,0 +1,39 @@
+---
+- name: Install haproxy
+  apt:
+    name: haproxy
+    state: present
+    update_cache: yes
+
+- name: Install haproxy configuration
+  template:
+    src: "../templates/haproxy.cfg.j2"
+    dest: "{{ haproxy_config }}"
+
+- name: Create haproxy server cert symlink
+  file:
+    state: link
+    src: "{{ haproxy_ssl_dir }}/certs/tls.crt"
+    dest: "{{ haproxy_ssl_dir }}/octoprint.pem"
+  when: octoprint_ssl_enabled|bool
+
+- name: Create haproxy server key symlink
+  file:
+    state: link
+    src: "{{ haproxy_ssl_dir }}/private/tls.key"
+    dest: "{{ haproxy_ssl_dir }}/octoprint.pem.key"
+  when: octoprint_ssl_enabled|bool
+
+- name: Validate haproxy configuration
+  shell: "haproxy -c -f {{ haproxy_config }}"
+  register: haproxy_validate
+
+- debug:
+    msg: "{{ haproxy_validate.stdout }}"
+
+- name: Start haproxy
+  systemd:
+    name: haproxy
+    state: restarted
+    enabled: true
+    daemon_reload: true
