@@ -8,6 +8,7 @@ Ansible Deployment of Single Board Computers
 - [x] Install packages
 - [x] Install Node Exporter
 - [x] Install NUT (currently supports only 1 ups device)
+- [x] Install Octoprint
 
 ## Requirements (Ansible Collections)
 
@@ -32,4 +33,3 @@ ansible-playbook -i hosts.yaml all.yaml --tags=metrics
 ## Accessing Prometheus Metrics
 
 With Node Exporter configured, metrics are accessible at `http://<hostname>:9100/metrics`
-
