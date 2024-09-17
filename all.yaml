@@ -6,7 +6,7 @@
   tasks:
     - import_role:
         name: common
-  
+
 # Install Notification Script
 - name: Installing Notification scripts
   tags: notification
@@ -14,6 +14,7 @@
   tasks:
     - import_role:
         name: notification
+      when: notification.enabled|bool
 
 # Install NUT
 - name: Installing NUT
@@ -22,6 +23,7 @@
   tasks:
     - import_role:
         name: nut
+      when: nut.enabled|bool
 
 # Install pfsense script
 - name: Installing pfsense backup
@@ -30,6 +32,7 @@
   tasks:
     - import_role:
         name: pfsense
+      when: pfsense.enabled|bool
 
 # Install node exporter
 - name: Installing Node Exporter
@@ -38,3 +41,12 @@
   tasks:
     - import_role:
         name: node_exporter
+
+# Install Octoprint
+- name: Installing Octoprint
+  tags: octoprint
+  hosts: sbc
+  tasks:
+    - import_role:
+        name: octoprint
+      when: octoprint.install|bool
