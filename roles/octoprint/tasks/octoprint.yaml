@@ -28,12 +28,9 @@
     create_home: true
     home: "{{ octoprint_base_dir }}"
     shell: "/sbin/nologin"
+    system: true
     state: present
     append: true
-
-- name: does octoprint exist
-  debug:
-    msg: "{{ octoprint_venv_check.stat.exists }}"
 
 - name: Install OctoPrint Python Module
   pip:
