@@ -11,4 +11,4 @@ User={{ octoprint_user }}
 ExecStart={{ octoprint_base_dir }}/bin/octoprint serve --host=127.0.0.1 --port={{ octoprint_web_port }}
 
 [Install]
-WantedBy=mutli-user.target
+WantedBy=default.target
