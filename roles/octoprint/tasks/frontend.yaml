@@ -24,6 +24,30 @@
     dest: "{{ haproxy_ssl_dir }}/octoprint.pem.key"
   when: octoprint_ssl_enabled|bool
 
+- name: Copy over 503-no-octoprint file
+  copy:
+    src: "../files/503-no-octoprint.http"
+    dest: "/etc/haproxy/errors/503-no-octoprint.http"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: Copy over 503-no-webcam file
+  copy:
+    src: "../files/503-no-webcam.http"
+    dest: "/etc/haproxy/errors/503-no-webcam.http"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+- name: Copy over 503-no-webcam-hls file
+  copy:
+    src: "../files/503-no-webcam-hls.http"
+    dest: "/etc/haproxy/errors/503-no-webcam-hls.http"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
 - name: Validate haproxy configuration
   shell: "haproxy -c -f {{ haproxy_config }}"
   register: haproxy_validate
