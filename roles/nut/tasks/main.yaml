@@ -112,6 +112,13 @@
     group: "root"
     mode: "0755"
 
+- name: Create log directory
+  file:
+    path: "{{ nut_log_dir }}"
+    owner: "{{ nut_user }}"
+    group: "{{ nut_group }}"
+    state: "directory"
+
 - name: Restarting nut driver
   shell: |
     /usr/sbin/upsdrvctl stop
