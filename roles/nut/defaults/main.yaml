@@ -1,6 +1,7 @@
 nut_enabled: "{{ nut.enabled | default(false) }}"
 nut_user: "root"
 nut_group: "nut"
+nut_log_dir: "/var/log/nut"
 
 nut_packages:
   - nut
@@ -67,4 +68,3 @@ upssched_lowbattery_timer: "180"
 # gotify variables
 gotify_creds_path: "/home/{{ ansible_user }}/.gotify_creds"
 gotify_script_path: "/usr/bin/sendMsg.sh"
-
