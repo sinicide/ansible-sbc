@@ -27,7 +27,7 @@
       - "video"
     create_home: true
     home: "{{ octoprint_base_dir }}"
-    shell: "/sbin/nologin"
+    shell: "/usr/sbin/nologin"
     system: true
     state: present
     append: true
